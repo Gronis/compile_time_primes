@@ -42,22 +42,32 @@ template<template<bool...> class array_, bool old_value, bool... old_values>
 struct  iterate<array_<old_value, old_values...>> : 
         iterate<array_<old_value> , array_<old_values...>>{};
 
-template<bool new_value, typename...> 
+template<bool new_value, size_t interval, size_t interval_left, typename...> 
+struct replace_rec; 
+
+template<bool new_value, size_t interval, typename...> 
 struct replace_; 
 
 // End, when array is empty
-template<bool new_value, template<bool...> class array_, bool... new_values>
-struct replace_<new_value, array_<new_values...>, array_<>> : bool_array<new_values...>{};
+template<bool new_value, size_t interval, size_t interval_left, template<bool...> class array_, bool... new_values>
+struct replace_rec<new_value, interval, interval_left, array_<new_values...>, array_<>> : bool_array<new_values...>{};
 
 // itarate
-template<bool new_value, template<bool...> class array_, bool old_value, bool... new_values, bool... old_values>
-struct  replace_<new_value, array_<new_values...>, array_<old_value, old_values...>> : 
-        replace_<new_value, array_<new_value, new_values...> , array_<old_values...>>{};
+template<bool new_value, size_t interval, size_t interval_left, template<bool...> class array_, bool old_value, bool... new_values, bool... old_values>
+struct  replace_rec<new_value, interval, interval_left, array_<new_values...>, array_<old_value, old_values...>> : 
+        replace_rec<
+            new_value,
+            interval, 
+            if_<interval_left == 0, size_t, 
+                interval, 
+            //else
+                interval_left - 1>::result,
+            array_<new_values..., if_<interval_left == 0, size_t, new_value, old_value>::result> , array_<old_values...>>{};
 
-//start with empty
-template<bool new_value, template<bool...> class array_, bool old_value, bool... old_values>
-struct  replace_<new_value, array_<old_value, old_values...>> : 
-        replace_<new_value, array_<new_value> , array_<old_values...>>{};
+//wrapper for more easy start call
+template<bool new_value, size_t interval, template<bool...> class array_, bool old_value, bool... old_values>
+struct  replace_<new_value, interval, array_<old_value, old_values...>> : 
+        replace_rec<new_value, interval, interval, array_<new_value> , array_<old_values...>>{};
 
 //Generate an array of N booleans filled with value
 template<int N, bool value, bool... values> struct bool_generator;
@@ -68,48 +78,6 @@ template<bool value, bool... values> struct bool_generator<0, value, values...> 
 // Recursion
 template<int N, bool value, bool... values> struct bool_generator : bool_generator<N - 1, value , value , values...> {};
 
-/*/fill each n-th element with value
-template<bool new_value, 
-        size_t steps, 
-        size_t current_step, 
-        template<bool...> class new_array, 
-        bool... values> struct fill; 
-
-template<bool new_value, size_t steps, size_t current_step, template<bool...> class new_array, bool... new_values, bool... old_values>
-struct fill<new_value, steps, current_step, new_array<new_values...>, old_values...> : 
-    bool_array<new_values...>{}; 
-
-template<bool new_value, size_t steps, size_t current_step, template<bool...> class new_array, bool old_value, bool... new_values, bool... old_values>
-struct fill<new_value, steps, current_step, template<new_values...> class new_array, old_value, old_values...> : 
-    fill<new_value, steps, if_<current_step == 0, size_t, steps, current_step - 1>::result, 
-    new_array<if_<current_step == 0, bool, new_value, old_value>::result, new_values...>, old_values...>{
-};*/
-//template<bool new_value, size_t steps, size_t current_step, size_t N, bool old_value, bool...values>
-//const bool fill<new_value, steps, current_step, N, old_value, values...>::array[N] = 
-//{result, fill<new_value, steps, if_<current_step == 0, size_t, steps, current_step - 1>::result, N, values...>::result };
-
-/*
-template<size_t N, size_t i, bool_array<N> primes>
-struct calc_prime;
-
-template<size_t N, bool_array<N> primes>
-struct calc_prime<N, 2, primes>{
-    static const bool[N] result = ;
-};
-
-template<size_t N, size_t i, bool_array<N> primes>
-struct calc_prime
-{
-    const static bool[N] result = 
-};
-
-
-bool is_prime(size_t num){
-    static prime_list primes = calc_prime<prime_list>::result;
-    assert(num < max_num);
-    return primes[num];
-}
-*/
 template<int max, bool value>
 bool generate_bool_array(int index){
     return iterate<typename bool_generator<max, value>::type>::value[index];
@@ -117,18 +85,18 @@ bool generate_bool_array(int index){
 
 template<int max, bool gen_value, bool replace_value>
 bool replace_bool_array(int index){
-    return replace_<replace_value, typename bool_generator<max, gen_value>::type>::value[index];
+    return replace_<replace_value, 3, typename bool_generator<max, gen_value>::type>::value[index];
 }
 
 int main(){
-    for (int i = 0; i < 100; ++i)
+    for (int i = 0; i < 10; ++i)
     {
-        std::cout << generate_bool_array<100, true>(i) << " ";
+        std::cout << generate_bool_array<10, true>(i) << " ";
     }
     std::cout << std::endl;
-    for (int i = 0; i < 100; ++i)
+    for (int i = 0; i < 10; ++i)
     {
-        std::cout << replace_bool_array<100, true, true>(i) << " ";
+        std::cout << replace_bool_array<10, true, false>(i) << " ";
     }
     std::cout << std::endl;
 
