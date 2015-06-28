@@ -209,13 +209,21 @@ bool is_prime(size_t number){
     /// all numbers that are divisable with the prime number: num) 
     /// with false, since they are no prime number.
     ///
+    /// Algorithm: 
+    ///     [2] is prime -> set [4, 6, 8, 10 ... max] as non primes
+    ///     [3] is prime -> set [6, 9, 12, 15... max] as non primes
+    ///     [4] is not prime -> skip
+    ///     [5] is prime -> set [10, 15, 20  ... max] as non primes
+    ///     [6] is not prime -> skip
+    ///     ...
+    ///
     /// 3:
     /// When the end is reached, bool_array ensures that a runtime
     /// accessable boolean array is created.
     /// 
-    /// Then, the prime number can be accessed from a simple array
+    /// Then, each prime numbers can be accessed from a simple array
     ///
-    ///////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////
     return calc_prime_array<max, 2, typename 
         bool_generator<max - 2, true>::type, bool_array<false, false>>
         ::type::value[number];
@@ -229,7 +237,7 @@ int main(){
         std::cin >> input;
         int value = atoi(input.c_str());
         std::cout 
-            << (input == "q"? "goodbye" : is_prime<max>(value) == false? "no" : "yes") 
+            << (input == "q"? "goodbye" : is_prime<max>(value)? "yes" : "no") 
             << std::endl;
     }
 }
