@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cassert>
+#include <string>
 
 /////////////////////////////////////////
 ///
@@ -7,17 +9,17 @@
 ///         different values accordingly.
 ///         
 /////////////////////////////////////////
-template<bool condition,typename T, T if_true, T if_false>
+template<bool condition, unsigned if_true, unsigned if_false>
 struct if_;
 
-template<typename T, T if_true, T if_false>
-struct if_<true, T, if_true, if_false>{
-    static const T result = if_true;
+template<unsigned if_true, unsigned if_false>
+struct if_<true, if_true, if_false>{
+    enum{ result = if_true };
 };
 
-template<typename T, T if_true, T if_false>
-struct if_<false, T, if_true, if_false>{
-    static const T result = if_false;
+template<unsigned if_true, unsigned if_false>
+struct if_<false, if_true, if_false>{
+    enum{ result = if_false };
 };
 /////////////////////////////////////////
 ///
@@ -46,7 +48,7 @@ struct get_index;
 
 template<size_t index, template<bool...> class array_, bool value, bool... values>
 struct get_index<index, index, array_<value, values...>>{
-    static const bool result = value;
+    enum{ result = value };
 };
 
 template<size_t index, size_t start, template<bool...> class array_, bool value, bool... values>
@@ -77,14 +79,12 @@ struct replace_rec<new_value, interval, interval_left, array_<new_values...>, ar
 // Recursive call to replace value.
 template<bool new_value, size_t interval, size_t interval_left, template<bool...> class array_, bool old_value, bool... new_values, bool... old_values>
 struct  replace_rec<new_value, interval, interval_left, array_<new_values...>, array_<old_value, old_values...>> : 
-        replace_rec<
-            new_value,
-            interval, 
-            if_<interval_left == 1, size_t, 
+        replace_rec<new_value, interval, 
+            if_<interval_left == 1, 
                 interval, 
             //else
                 interval_left - 1>::result,
-            array_<new_values..., if_<interval_left == 1, size_t, new_value, old_value>::result> , array_<old_values...>>{};
+            array_<new_values..., if_<interval_left == 1, new_value, old_value>::result> , array_<old_values...>>{};
 
 //wrapper for more easy start call
 template<bool new_value, size_t interval, template<bool...> class array_, bool old_value, bool... old_values>
@@ -104,7 +104,7 @@ template<bool value, bool... values> struct bool_generator<0, value, values...> 
     typedef bool_array<values...> type;
 };
 // Recursive inheritance to generate all values
-template<int N, bool value, bool... values> struct bool_generator : bool_generator<N - 1, value , value , values...> {};
+template<int N, bool value, bool... values> struct bool_generator : bool_generator<N - 1, value , values..., value> {};
 
 ///////////////////////////////////////////////////////////////////
 ///
@@ -118,7 +118,7 @@ template<size_t N, size_t current, typename...> struct calc_prime_array;
 // Recursive inheritance to generate prime array
 template<size_t N, size_t current, template<bool...> class array_, bool... values> 
 struct calc_prime_array<N, current, array_<values...>> : calc_prime_array<N, current + 1, typename replace_<false, 
-    if_<get_index<current, 0, bool_array<values...>>::result, size_t, current, N>::result, array_<values...>>::type > {};
+    if_<get_index<current, 0, bool_array<values...>>::result, current, N>::result, array_<values...>>::type > {};
 
 //When current == N, we have reached the end
 template<size_t N, template<bool...> class array_, bool... values> 
@@ -138,14 +138,22 @@ struct calc_prime_array<N, N, array_<values...>> : bool_array<values...>{};
 ///////////////////////////////////////////////////////////////////
 template<size_t max = 200>
 bool is_prime(size_t number){
-    return calc_prime_array<max, 2, typename bool_generator<max, true>::type>::value[number];
+    assert(number < max);
+    return calc_prime_array<max, 2, typename bool_generator<max, true, false, false>::type>::value[number];
 }
 
 int main(){
     const int max = 50;
     for (int i = 0; i < max; ++i)
     {
-        if(is_prime(i)) std::cout << i << std::endl;
+        if(is_prime<max>(i)) std::cout << i << std::endl;
     }
     std::cout << std::endl;
+    std::string input = "";
+    while(input != "q") {
+        std::cout << "Check if number is prime (max " << max << "): ";
+        std::cin >> input;
+        int value = atoi(input.c_str());
+        std::cout << (input == "q"? "goodbye" : is_prime<max>(value) == false? "no" : "yes") << std::endl;
+    }
 }
