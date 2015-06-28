@@ -36,34 +36,6 @@ struct bool_array{
 template<bool... values> 
 bool const bool_array<values...>::value[] = {values ...};
 
-/////////////////////////////////////////
-///
-/// get_index_
-///             access array elements 
-///             compile-time.
-///
-/////////////////////////////////////////
-template<   size_t index, 
-            size_t start, 
-            typename...>
-struct get_index;
-
-template<   size_t index, 
-            template<bool...> class array_, 
-            bool value, 
-            bool... values>
-struct get_index<index, index, array_<value, values...>>{
-    enum{ result = value };
-};
-
-template<   size_t index, 
-            size_t start, 
-            template<bool...> class array_, 
-            bool value, 
-            bool... values>
-struct  get_index<index, start, array_<value, values...>> : 
-        get_index<index, start + 1, array_<values...>>{};
-
 /////////////////////////////////////////////////////////////////
 ///
 /// replace_
