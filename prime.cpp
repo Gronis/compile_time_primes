@@ -43,16 +43,26 @@ bool const bool_array<values...>::value[] = {values ...};
 ///             compile-time.
 ///
 /////////////////////////////////////////
-template<size_t index, size_t start, typename...>
+template<   size_t index, 
+            size_t start, 
+            typename...>
 struct get_index;
 
-template<size_t index, template<bool...> class array_, bool value, bool... values>
+template<   size_t index, 
+            template<bool...> class array_, 
+            bool value, 
+            bool... values>
 struct get_index<index, index, array_<value, values...>>{
     enum{ result = value };
 };
 
-template<size_t index, size_t start, template<bool...> class array_, bool value, bool... values>
-struct get_index<index, start, array_<value, values...>> : get_index<index, start + 1, array_<values...>>{};
+template<   size_t index, 
+            size_t start, 
+            template<bool...> class array_, 
+            bool value, 
+            bool... values>
+struct  get_index<index, start, array_<value, values...>> : 
+        get_index<index, start + 1, array_<values...>>{};
 
 /////////////////////////////////////////////////////////////////
 ///
@@ -64,35 +74,70 @@ struct get_index<index, start, array_<value, values...>> : get_index<index, star
 ///             with a prime number as a non prime number
 ///
 /////////////////////////////////////////////////////////////////
-template<bool new_value, size_t interval, size_t interval_left, typename...> 
+template<   bool new_value, 
+            size_t interval, 
+            size_t interval_left, 
+            typename...> 
 struct replace_rec; 
 
-template<bool new_value, size_t interval, typename...> 
+template<   bool new_value, 
+            size_t interval, 
+            typename...> 
 struct replace_; 
 
 // End, when array is empty
-template<bool new_value, size_t interval, size_t interval_left, template<bool...> class array_, bool... new_values>
-struct replace_rec<new_value, interval, interval_left, array_<new_values...>, array_<>>{
+template<   bool new_value, 
+            size_t interval, 
+            size_t interval_left, 
+            template<bool...> class array_, 
+            bool... new_values>
+struct  replace_rec<new_value, interval, interval_left, 
+            array_<new_values...>, 
+            array_<>>{
     typedef bool_array<new_values...> type;
 };
 
 // Recursive call to replace value.
-template<bool new_value, size_t interval, size_t interval_left, template<bool...> class array_, bool old_value, bool... new_values, bool... old_values>
-struct  replace_rec<new_value, interval, interval_left, array_<new_values...>, array_<old_value, old_values...>> : 
+template<   bool new_value, 
+            size_t interval, 
+            size_t interval_left, 
+            template<bool...> class array_, 
+            bool old_value, 
+            bool... new_values, 
+            bool... old_values>
+struct  replace_rec<new_value, interval, interval_left, 
+            array_<new_values...>, array_<old_value, old_values...>> : 
         replace_rec<new_value, interval, 
+            //if current value should be replaced, replace it
             if_<interval_left == 1, 
                 interval, 
             //else
                 interval_left - 1>::result,
-            array_<new_values..., if_<interval_left == 1, new_value, old_value>::result> , array_<old_values...>>{};
+            //endif
+            array_<new_values..., 
+                if_<interval_left == 1, 
+                    new_value, 
+                //else
+                    old_value>::result> ,
+                //endif
+                array_<old_values...>
+            >{};
 
 //wrapper for more easy start call
-template<bool new_value, size_t interval, template<bool...> class array_, bool old_value, bool... old_values>
-struct  replace_<new_value, interval, array_<old_value, old_values...>> : 
-        replace_rec<new_value, interval, interval - 1, array_<old_value> , array_<old_values...>>{};
+template<   bool new_value, 
+            size_t interval, 
+            template<bool...> class array_, 
+            bool old_value, 
+            bool... old_values>
+struct  replace_<new_value, interval, 
+            array_<old_value, old_values...>> : 
+        replace_rec<new_value, interval, interval - 1, 
+            array_<old_value> , array_<old_values...>>{};
 
-//replace without elements
-template<bool new_value, size_t interval, template<bool...> class array_>
+//wrapper without elements
+template<   bool new_value, 
+            size_t interval, 
+            template<bool...> class array_>
 struct  replace_<new_value, interval, array_<>> {
     typedef bool_array<> type;
 };
@@ -104,13 +149,23 @@ struct  replace_<new_value, interval, array_<>> {
 ///             values.
 ///
 /////////////////////////////////////////////////////////////////
-template<int N, bool value, bool... values> struct bool_generator;
+template<   int N, 
+            bool value, 
+            bool... values> 
+struct bool_generator;
+
 // End when N reaches 0
-template<bool value, bool... values> struct bool_generator<0, value, values...> : bool_array<values...> {
+template<   bool value, 
+            bool... values> 
+struct bool_generator<0, value, values...> {
     typedef bool_array<values...> type;
 };
 // Recursive inheritance to generate all values
-template<int N, bool value, bool... values> struct bool_generator : bool_generator<N - 1, value , values..., value> {};
+template<   int N, 
+            bool value, 
+            bool... values> 
+struct  bool_generator : 
+        bool_generator<N - 1, value , values..., value> {};
 
 ///////////////////////////////////////////////////////////////////
 ///
@@ -119,16 +174,35 @@ template<int N, bool value, bool... values> struct bool_generator : bool_generat
 ///             set to whenever that number is a prime or not.
 ///
 ///////////////////////////////////////////////////////////////////
-template<size_t N, size_t current, typename...> struct calc_prime_array;
+template<   size_t N, 
+            size_t current, 
+            typename...> 
+struct calc_prime_array;
 
 // Recursive inheritance to generate prime array
-template<size_t N, size_t current, template<bool...> class array_, bool input_value, bool... input_values, bool... output_values> 
-struct  calc_prime_array<N, current, array_<input_value, input_values...>, array_<output_values...>> : 
+template<   size_t N, 
+            size_t current, 
+            template<bool...> class array_, 
+            bool input_value, 
+            bool... input_values, 
+            bool... output_values> 
+struct  calc_prime_array<N, current, 
+            array_<input_value, input_values...>, 
+            array_<output_values...>> : 
         calc_prime_array<N, current + 1, typename replace_<false, 
-        if_<input_value, current, N>::result, array_<input_values...>>::type, array_<output_values..., input_value> > {};
+        //if input value is prime, set all values divisable with prime as a non-prime
+        if_<input_value, 
+            current, 
+        //else
+            N>::result, 
+        //endif
+        array_<input_values...>>::type,             //replace every dividable input with current_prime
+        array_<output_values..., input_value> > {}; //place input value with the finished array
 
-//When current == N, we have reached the end
-template<size_t N, template<bool...> class array_, bool... output_values> 
+//When current == N, we have reached the end, stop
+template<   size_t N, 
+            template<bool...> class array_, 
+            bool... output_values> 
 struct calc_prime_array<N, N, array_<>, array_<output_values...>> {
     typedef bool_array<output_values...> type;
 };
@@ -147,7 +221,9 @@ struct calc_prime_array<N, N, array_<>, array_<output_values...>> {
 template<size_t max = 200>
 bool is_prime(size_t number){
     assert(number < max);
-    return calc_prime_array<max, 2, typename bool_generator<max - 2, true>::type, bool_array<false, false>>::type::value[number];
+    return calc_prime_array<max, 2, typename 
+        bool_generator<max - 2, true>::type, bool_array<false, false>>
+        ::type::value[number];
 }
 
 int main(){
@@ -169,6 +245,8 @@ int main(){
         std::cout << "Check if number is prime (max " << max << "): ";
         std::cin >> input;
         int value = atoi(input.c_str());
-        std::cout << (input == "q"? "goodbye" : is_prime<max>(value) == false? "no" : "yes") << std::endl;
+        std::cout 
+            << (input == "q"? "goodbye" : is_prime<max>(value) == false? "no" : "yes") 
+            << std::endl;
     }
 }
