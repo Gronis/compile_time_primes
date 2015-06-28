@@ -40,7 +40,7 @@ bool const bool_array<values...>::value[] = {values ...};
 ///
 /// replace_
 ///             Replace elements with value after each interval.
-///             First replacement starts after interval * 2.
+///             First replacement starts after interval - 1.
 ///
 ///             Used for setting all values that are divideable
 ///             with a prime number as a non prime number
@@ -162,16 +162,16 @@ struct  calc_prime_array<N, current,
             array_<input_value, input_values...>, 
             array_<output_values...>> : 
         calc_prime_array<N, current + 1, typename replace_<false, 
-        //if input value is prime, set all values divisable with prime as a non-prime
+        // if input value is prime, set all values divisable with prime as a non-prime
         if_<input_value, 
             current, 
-        //else
+        // else
             N>::result, 
-        //endif
-        array_<input_values...>>::type,             //replace every dividable input with current_prime
-        array_<output_values..., input_value> > {}; //place input value with the finished array
+        // endif
+        array_<input_values...>>::type,             // replace every dividable input with current_prime
+        array_<output_values..., input_value> > {}; // place input value with the finished array
 
-//When current == N, we have reached the end, stop
+// When current == N, we have reached the end, stop
 template<   size_t N, 
             template<bool...> class array_, 
             bool... output_values> 
@@ -193,6 +193,29 @@ struct calc_prime_array<N, N, array_<>, array_<output_values...>> {
 template<size_t max = 200>
 bool is_prime(size_t number){
     assert(number < max);
+    ///////////////////////////////////////////////////////////////
+    ///
+    /// Calculates a compile-time bool array that tells if a number
+    /// accessed with some index is a prime number or not. This is
+    /// done with the following steps:
+    ///
+    /// 1:                        [0]    [1]    [2]   [3] ... [max]
+    /// Generates an array with [false, false, true, true ... true]
+    ///
+    /// 2:
+    /// Iterate throught the array starting from 2 (first prime) 
+    /// to max. If that number is a prime (array[num] == true) 
+    /// replace all following values with the interval num (which is 
+    /// all numbers that are divisable with the prime number: num) 
+    /// with false, since they are no prime number.
+    ///
+    /// 3:
+    /// When the end is reached, bool_array ensures that a runtime
+    /// accessable boolean array is created.
+    /// 
+    /// Then, the prime number can be accessed from a simple array
+    ///
+    ///////////////////////////////////////////////////////////////
     return calc_prime_array<max, 2, typename 
         bool_generator<max - 2, true>::type, bool_array<false, false>>
         ::type::value[number];
@@ -200,18 +223,6 @@ bool is_prime(size_t number){
 
 int main(){
     const int max = 200;
-    /*
-    for (int i = 0; i < max; ++i)
-    {
-        std::cout << replace_<false, 2, typename bool_generator<max, true>::type>::type::value[i] << " ";
-    }
-    std::cout << std::endl;
-    for (int i = 0; i < max; ++i)
-    {
-        if(is_prime<max>(i)) std::cout << i << std::endl;
-    }
-    std::cout << std::endl;
-    */
     std::string input = "";
     while(input != "q") {
         std::cout << "Check if number is prime (max " << max << "): ";
