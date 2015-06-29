@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <string>
+#include <stdlib.h>
 
 /////////////////////////////////////////
 ///
