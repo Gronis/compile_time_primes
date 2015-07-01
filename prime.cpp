@@ -237,6 +237,7 @@ bool is_prime(size_t number){
 
 int main(){
     const int max = 200;
+    std::cout << "Type q to exit" << std::endl;
     std::string input = "";
     while(input != "q") {
         std::cout << "Check if number is prime (max " << max << "): ";
