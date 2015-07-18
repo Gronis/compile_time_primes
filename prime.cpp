@@ -1,7 +1,5 @@
+#include <cstddef>
 #include <iostream>
-#include <cassert>
-#include <string>
-#include <stdlib.h>
 
 /////////////////////////////////////////
 ///
@@ -188,8 +186,8 @@ struct calc_prime_array<N, N, array_<>, array_<output_values...>> {
 ///////////////////////////////////////////////////////////////////
 ///
 /// is_prime
-///             generates a compiletime bool array with the size of
-///             max, and evalute witch are primes or not
+///             generates a compile time bool array with the size of
+///             max, and evaluate witch are primes or not
 ///             (compile-time).
 ///
 /// USAGE:      is_prime(i) //i should be less than 200
@@ -198,7 +196,6 @@ struct calc_prime_array<N, N, array_<>, array_<output_values...>> {
 ///////////////////////////////////////////////////////////////////
 template<size_t max = 200>
 bool is_prime(size_t number){
-    assert(number < max);
     ///////////////////////////////////////////////////////////////
     ///
     /// Calculates a compile-time bool array that tells if a number
@@ -237,14 +234,15 @@ bool is_prime(size_t number){
 
 int main(){
     const int max = 200;
-    std::cout << "Type q to exit" << std::endl;
-    std::string input = "";
-    while(input != "q") {
+    auto value = 0;
+    auto valid_input = true;
+    std::cout << "Type negative number or " << max << "+ to exit" << std::endl;
+    while(valid_input) {
         std::cout << "Check if number is prime (max " << max << "): ";
-        std::cin >> input;
-        int value = atoi(input.c_str());
+        std::cin >> value;
+        valid_input = value >= 0 && value < max;
         std::cout 
-            << (input == "q"? "goodbye" : is_prime<max>(value)? "yes" : "no") 
+            << (!valid_input? "goodbye" : is_prime<max>(value)? "yes" : "no") 
             << std::endl;
     }
 }
