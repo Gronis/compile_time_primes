@@ -6,6 +6,4 @@ The bool array is calculated compiletime which by using c++ meta programming. Th
 c++11 comilator.
 
 
-Currently, compiling with more than 500 primes takes forever, so optimization might be needed. Calculating primes realtime is probably preferrable instead.
-This project was done because I wanted to learn meta programming in c++, and calculating whenever a number is a prime was the first assignment I was introduced to 
-when I started at Chalmers University. Feel free to use the code however you like (if you can make any since of it).
+Currently, compiling with more than 500 primes takes forever, so optimization might be needed. Calculating primes realtime (not force the compiler to do it) is probably preferrable. This project was done because I wanted to learn meta programming in c++, and calculating whenever a number is a prime was the first assignment I was introduced to when I started at Chalmers University. Using meta programming like this is not very useful, but feel free to use the code however you like (if you can make any since of it).
